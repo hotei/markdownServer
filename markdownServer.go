@@ -20,13 +20,21 @@ import (
 )
 
 const portNum = 8080
-const virtualURL = "/markdown/"
+const virtualURL = "/md/"
 const serverRoot = "/www/"
+
+var mdDir = []byte (`<a href="./goroutine.md">Goroutine</a><br>
+<a href="./walker.md">Walker</a>`)
 
 var portNumString = fmt.Sprintf(":%d", portNum)
 
-func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	// fmt.Fprintf(w, "<!-- %s %v -->", r.Method, r.URL) debug request input
+func WebHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "<!-- %s %v -->", r.Method, r.URL) // debug request input
+	if len(r.URL.Path) == len(virtualURL) {
+		// User wants to browse - could do on the fly but this works as is.
+		w.Write(mdDir)
+		return
+	}
 	urlOffset := len(virtualURL)
 	output := htmlFromMd("/www/" + r.URL.Path[urlOffset:])
 	w.Write(output)
@@ -50,7 +58,7 @@ func htmlFromMd(fname string) []byte {
 
 func main() {
 	fmt.Printf("Starting markdown server at localhost:%s\n", portNumString)
-	http.HandleFunc(virtualURL, HelloHandler)
+	http.HandleFunc(virtualURL, WebHandler)
 	http.Handle(serverRoot, http.StripPrefix(serverRoot, http.FileServer(http.Dir(serverRoot))))
 	err := http.ListenAndServe(portNumString, nil)
 	if err != nil {
