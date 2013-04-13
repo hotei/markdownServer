@@ -1,43 +1,66 @@
-// markdown_server.go
+// markdownServer.go
+
+//   (c) 2012 David Rook  ( hotei1352@gmail.com )
+//		serves markdown docs @ "http://127.0.0.1:8080/md/"
+//		md is a virtual URL mapped onto /www
+//		status - working
 package main
 
-/*
- * (c) 2012 David Rook  ( hotei1352@gmail.com )
- *
- * to serve markdown docs, browse to "http://127.0.0.1:8080/www/docname.md"
- *
- * status - working
- * 
- */
-
 import (
+	// Alien imports
+	"github.com/blackfriday" // Russ Ross 2012-11-22 version
+	// below refers only to go 1.0.3 standard lib pkg
 	"fmt"
-	"github.com/blackfriday"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 const portNum = 8080
 const virtualURL = "/md/"
 const serverRoot = "/www/"
 
-var mdDir = []byte (`<a href="./goroutine.md">Goroutine</a><br>
-<a href="./walker.md">Walker</a>`)
+var mdDir = []byte(`
+<h3>Cant find index.html</h3>
+<a href="./MarkDownTest.md">My BlackFriday Test</a><br>
+<a href="./markdown-syntax.md">Markdown Syntax</a><br>
+<!-- <a href="./walker.md">Walker</a><br>
+-->
+`)
 
 var portNumString = fmt.Sprintf(":%d", portNum)
 
 func WebHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<!-- %s %v -->", r.Method, r.URL) // debug request input
 	if len(r.URL.Path) == len(virtualURL) {
-		// User wants to browse - could do on the fly but this works as is.
-		w.Write(mdDir)
+		// browse directory via index.html, don't allow 'raw' directory
+		ndxBytes, err := ioutil.ReadFile(serverRoot + "index.html")
+		if err != nil {
+			w.Write(mdDir)
+			return
+		}
+		w.Write(ndxBytes)
 		return
 	}
+	// if tail of URL.Path == ".md" then use htmlFromMd, else just output it
 	urlOffset := len(virtualURL)
-	output := htmlFromMd("/www/" + r.URL.Path[urlOffset:])
+	fileName := r.URL.Path[urlOffset:]
+	ext := filepath.Ext(fileName)
+	var output []byte
+	var err error
+	if ext == ".md" {
+		output = htmlFromMd(serverRoot + fileName)
+	} else {
+		output, err = ioutil.ReadFile(serverRoot + fileName)
+		if err != nil {
+			fmt.Printf("error %v\n", err)
+			return
+		}
+	}
 	w.Write(output)
+	//fmt.Fprintf(w, "<-- %q %q-->",fileName, ext)
 }
 
 func htmlFromMd(fname string) []byte {
@@ -49,7 +72,7 @@ func htmlFromMd(fname string) []byte {
 	} else {
 		output = blackfriday.MarkdownCommon(input)
 	}
-	if false {
+	if false { // debug use only
 		os.Stdout.Write(input)
 		os.Stdout.Write(output)
 	}
