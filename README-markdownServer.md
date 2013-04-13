@@ -8,6 +8,8 @@ markdownServer is a minimalist webserver that serves markdown docs (*.md)
 from a directory.  My version uses /www but thats for convenience rather
 than necessity.
 
+Comments can be sent through github or directly to <hotei1352@gmail.com> .
+
 Setup
 -----
 
@@ -92,4 +94,4 @@ The 'markdownServer' go program is distributed under the Simplified BSD License:
 > NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 > ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// EOF README.md  (this is a markdown document and tested OK with blackfriday)
+// EOF README-markdownServer.md  (this is a markdown document and tested OK with blackfriday)
