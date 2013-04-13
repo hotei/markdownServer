@@ -14,11 +14,35 @@ Setup
 -----
 
 1. Create directory to be served and fill it with your markdown docs.
+	* for convenience in updating these documents can be links 
+	* for that matter the directory could be empty except for index.html which
+	would point back to the original file locations but that makes backup a bit
+	harder.  Your choice.
 1. write an index.html file in that directory something like shown below
-1. Start the server with markdownServer &
+1. get blackfriday
+	* I usually download zips from github since I'm usually not interested in history
+	or branches.  go get may also work.
+	* unpack it into your gopath so it ends up at $GOPATH/github.com/blackfriday
+	* if you have a multi-part $GOPATH go get will put it into the first part. Thats
+	the recommended way if you do it manually as well.
+1. Edit markdownServer.go if desired for possible customizations:
+	* portNum : I used 8080.  If you change it, the invoking line must also change
+	* virtualURL : This directory doesn't exist in the file tree, its what you
+	browse to the server with.  md made sense to me but "markdown" or "docs" might
+	be just as good.
+	* serverRoot : This one has to exist but it can be whereever you want. 
+	* mdDir : This is optional but recommended.  If your index.html file doesn't
+	exist or is unreadable this will patch in an error message and possibly a doc file
+	or two in either markdown or html.
+1. Start the server with markdownServer &  Assuming no problems it will announce
+	itself at portNum and start serving.
 1. Browse to localhost:8080/md locally or hostname:8080/md from a different system.
  
-You should see the index.html file created in the above step. 
+In the browser you should see the list of documents from your index.html file.  Clicking
+on a markdown document will convert it to html on the fly.
+
+Sample index.html
+-----------------
 
 ```
 <html>
@@ -39,7 +63,9 @@ You should see the index.html file created in the above step.
 </html>
 ```
 
-Go makes this embarrasingly simple. It's only 90 lines of code. 
+Go makes this embarrasingly simple. It's only 90 lines of code. The real magic
+happens in Russ Ross's blackfriday or in the go net/http library.  My contribution
+is just a little glue.
 
 Still, it works well and it may serve as an example
 for those just getting started with go.  I also use it
@@ -48,12 +74,26 @@ to preview markdown docs before I upload them to github.
 
 BUGS
 ----
-? None known
+None known
+
+SECURITY
+--------
+* No input is requested from the user. If that is changed a more paranoid approach
+may be necessary (templates perhaps).
+* Opening markdown files in itself should be safe but they can have links that go
+anywhere. Following those links requires the usual warning.
+* Embedded images that are corrupted (intentionally or otherwise) could pose a risk.
+  * This is a browser issue so keeping that updated is a good idea.
+* Security issues of dependencies and the go standard library should be tracked
+  * Watch for new releases of blackfriday on github
+  * Watch for new releases of go on golang.org and/or golang-nuts forum.
+*  If you don't personally control the files that go into the served directory it
+would be wise to sanity check the files before reading them. (see todo)
 
 TODO
 ----
-Nothing planned
-
+* test IsRegularFile(fname) before ioutil.ReadFile(fname)
+	
 NOTES
 -----
 Requires blackfriday from https://github.com/russross/blackfriday
@@ -63,7 +103,7 @@ idea of more readable web text and early implementations.
 
 http://en.wikipedia.org/wiki/Markdown
 
-history
+History
 -------
 * 2013-04-12 publish on github.com/hotei/markdownServer
 * 2012-04-02 started

@@ -1,6 +1,6 @@
 // markdownServer.go
 
-//   (c) 2012 David Rook  ( hotei1352@gmail.com )
+//   (c) 2012-2013 David Rook  ( hotei1352@gmail.com )
 //		serves markdown docs @ "http://127.0.0.1:8080/md/"
 //		md is a virtual URL mapped onto /www
 //		status - working
@@ -33,6 +33,8 @@ var mdDir = []byte(`
 var portNumString = fmt.Sprintf(":%d", portNum)
 
 func WebHandler(w http.ResponseWriter, r *http.Request) {
+	var output []byte
+	var err error
 	fmt.Fprintf(w, "<!-- %s %v -->", r.Method, r.URL) // debug request input
 	if len(r.URL.Path) == len(virtualURL) {
 		// browse directory via index.html, don't allow 'raw' directory
@@ -48,9 +50,7 @@ func WebHandler(w http.ResponseWriter, r *http.Request) {
 	urlOffset := len(virtualURL)
 	fileName := r.URL.Path[urlOffset:]
 	ext := filepath.Ext(fileName)
-	var output []byte
-	var err error
-	if ext == ".md" {
+	if ext == ".md" || ext == ".markdown" || ext == ".mdown" {
 		output = htmlFromMd(serverRoot + fileName)
 	} else {
 		output, err = ioutil.ReadFile(serverRoot + fileName)
