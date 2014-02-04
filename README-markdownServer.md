@@ -6,7 +6,7 @@ markdownServer.go
 
 markdownServer is a minimalist webserver that serves markdown docs (*.md)
 from a directory.  My version uses /www but thats for convenience rather
-than necessity.
+than necessity. Builds with go 1.2 (and probably 1.X). 
 
 Comments can be sent through github or directly to <hotei1352@gmail.com> .
 
